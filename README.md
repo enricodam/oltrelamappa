@@ -15,11 +15,18 @@ Poi navighi la **mappa del mare** e visiti le isole una alla volta. Ogni isola a
 
 Non si "perde" mai in modo frustrante: un minigioco fallito fa semplicemente riprovare.
 
-## I tre minigiochi (riusabili)
+## I minigiochi (riusabili)
 
-1. **Tempismo** (`rhythm`): ferma il cursore nella zona verde al momento giusto.
-2. **Movimento/Mira** (`aim`): muovi il personaggio per raccogliere gli oggetti buoni ed evitare quelli cattivi. Funziona con frecce, A/D, trascinamento e pulsanti a schermo.
+1. **Tempismo** (`rhythm`): ferma il cursore nella zona giusta al momento giusto. Supporta un tema "miccia" (`theme: 'fuse'`) con miccia visibile, acciarino come cursore e stoppino come bersaglio.
+2. **Movimento/Mira** (`aim`): muovi il personaggio per raccogliere gli oggetti buoni ed evitare quelli cattivi. Frecce, A/D, trascinamento e pulsanti a schermo.
 3. **Logica** (`logic`): indovinelli a scelta multipla. In difficile aumentano le opzioni e compare un timer.
+4. **Memory** (`memory`): trova le coppie uguali. La difficolta regola numero di coppie, sbirciata iniziale ed errori concessi.
+
+Tutti i minigiochi d'azione hanno un conto alla rovescia 3-2-1 e un ritmo crescente. Prima di ogni prova si puo' scegliere la difficolta al volo.
+
+## Grafica
+
+Gli sprite sono pixel art "32 bit" (palette con luci e ombre) disegnati su canvas da griglie di caratteri in `js/sprites.js`, stessa tecnica di Piccoli Eroi 2. Stile, palette e font (Press Start 2P) sono allineati a Piccoli Eroi 2. Su ogni schermata ci sono i pulsanti fissi Salva (icona floppy), ? (aiuto) e audio.
 
 ## La storia (v1)
 

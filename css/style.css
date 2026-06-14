@@ -70,8 +70,9 @@ b, strong { color: var(--gold); }
   background: var(--panel); cursor: pointer; transition: all .15s;
   display: flex; align-items: center; justify-content: center;
 }
-#saveBtn { right: 8px; height: 40px; padding: 0 10px; gap: 4px; font-size: 8px; border: 2px solid var(--green); color: var(--green); }
-#saveBtn:hover { background: var(--green); color: var(--bg); }
+#saveBtn { right: 8px; width: 40px; height: 40px; padding: 0; border: 2px solid var(--green); color: var(--green); }
+#saveBtn:hover { background: rgba(78,204,163,.18); }
+#saveBtn canvas { display: block; }
 #helpBtn { right: 104px; width: 40px; height: 40px; font-size: 15px; border: 2px solid var(--blue); color: var(--blue); }
 #helpBtn:hover { background: var(--blue); color: var(--bg); }
 #soundToggle { right: 56px; width: 40px; height: 40px; font-size: 15px; border: 2px solid var(--gold); color: var(--gold); }
@@ -219,6 +220,16 @@ b, strong { color: var(--gold); }
 .mg-zone-core { position: absolute; top: 0; bottom: 0; background: rgba(245,197,66,.5); }
 .mg-cursor { position: absolute; top: -3px; bottom: -3px; width: 6px; background: #fff; transform: translateX(-50%); box-shadow: 0 0 6px #fff; }
 
+/* tempismo a tema "miccia": miccia visibile, acciarino come cursore, stoppino come bersaglio */
+.mg-bar-fuse { height: 54px; background:
+  repeating-linear-gradient(45deg, #6e4a26 0 5px, #9a6a3a 5px 10px),
+  linear-gradient(180deg, #2a1c0e, #150e06); }
+.mg-bar-fuse::before { content: '🔥'; position: absolute; left: 2px; top: 50%; transform: translateY(-50%); font-size: 18px; animation: pulse 1s infinite; }
+.mg-zone-wick { background: rgba(245,197,66,.18); border-color: var(--gold); display: grid; place-items: center; }
+.mg-zone-wick .wick { font-size: 22px; }
+.mg-cursor-flint { width: 0; background: none; box-shadow: none; top: 0; bottom: 0; }
+.mg-cursor-flint canvas { position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%); }
+
 /* mira/movimento */
 .mg-field { position: relative; height: 46vh; min-height: 280px; overflow: hidden; border: 2px solid var(--gold);
   background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 3px, transparent 3px 9px), linear-gradient(180deg, #15375f, #0a1730); touch-action: none; }
@@ -238,6 +249,17 @@ b, strong { color: var(--gold); }
 .mg-hint { font-size: 8px; color: var(--blue); line-height: 1.7; }
 .mg-timer { height: 12px; border: 2px solid var(--gold); background: #0a1730; overflow: hidden; }
 .mg-timer-bar { height: 100%; width: 100%; background: var(--accent); transition: width .1s linear; }
+
+/* memory */
+.mg-mem-grid { display: grid; gap: 8px; }
+.mem-card { position: relative; aspect-ratio: 1; font-family: var(--pixel); background: var(--panel); border: 2px solid var(--gold); cursor: pointer; transition: background .12s, border-color .12s; }
+.mem-card .mem-face { position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; opacity: 0; transition: opacity .12s; }
+.mem-card::after { content: '?'; position: absolute; inset: 0; display: grid; place-items: center; color: var(--gold); font-size: 18px; opacity: 1; transition: opacity .12s; }
+.mem-card.show { background: var(--bg2); }
+.mem-card.show .mem-face { opacity: 1; }
+.mem-card.show::after { opacity: 0; }
+.mem-card.matched { border-color: var(--green); background: rgba(78,204,163,.15); }
+.mem-card:disabled { cursor: default; }
 
 /* ---------- help overlay + toast ---------- */
 .help-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 2000; display: flex; align-items: center; justify-content: center; animation: fadeIn .2s ease; padding: 12px; }

@@ -1,5 +1,5 @@
 // Service worker - strategia network-first, aggiornamento automatico
-const CACHE = 'oltrelamappa-v3';
+const CACHE = 'oltrelamappa-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const ASSETS = [
   './js/minigames/rhythm.js',
   './js/minigames/aim.js',
   './js/minigames/logic.js',
+  './js/minigames/memory.js',
   './js/content/islands.js',
   './js/content/story.js',
   './icons/icon-192.png',

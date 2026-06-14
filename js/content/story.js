@@ -113,11 +113,11 @@ export const NODES = {
   faro_8: {
     scene: '🗼🔥', speaker: 'Nonna Vela', speakerClass: 'vela',
     text: [
-      'La lente e\' rimontata. Ora manca solo la scintilla. Devi battere l\'acciarino al momento giusto, quando la miccia passa davanti a te.',
+      'La lente e\' rimontata. Ora manca la fiamma. Lungo la miccia corre l\'acciarino: battilo proprio quando passa sopra lo stoppino della lampada.',
     ],
     minigame: {
       type: 'rhythm',
-      config: { title: 'Accendi il faro!', prompt: 'Ferma il cursore sulla scintilla verde.', rounds: 3 },
+      config: { title: 'Accendi il faro!', tag: '🔥 Miccia', prompt: 'Batti l\'acciarino quando passa sullo stoppino 🕯️', rounds: 3, theme: 'fuse', zoneEmoji: '🕯️', cursorSprite: 'acciarino' },
       win: 'faro_9',
       winText: 'FIAMMA! La grande luce del faro torna ad accendersi e spazza il mare.',
       loseText: 'La scintilla non prende. Respira e riprova, e\' questione di tempismo.',
@@ -200,9 +200,24 @@ export const NODES = {
     minigame: {
       type: 'rhythm',
       config: { title: 'Rispondi alla nebbia', prompt: 'Ferma il cursore sulla nota verde, a tempo.', rounds: 4 },
-      win: 'nebbie_3',
-      winText: 'A ogni risposta giusta la nebbia si apre un po\'. Finche\' davanti a te appare una bambina.',
+      win: 'nebbie_2b',
+      winText: 'A ogni risposta giusta la nebbia si apre un po\'. Tra i banchi di foschia luccicano delle conchiglie.',
       loseText: 'La nota ti sfugge e la nebbia si richiude. Riprova, ascolta il ritmo.',
+    },
+  },
+
+  nebbie_2b: {
+    mood: 'fog', speaker: 'Bussola', speakerClass: 'bussola',
+    text: [
+      { famiglia: 'Le conchiglie suonano a coppie. Ricorda dove sono e abbinale: la nebbia si aprira\' del tutto.',
+        ragazzi: 'Senti? Ogni conchiglia ha la sua gemella, che suona la stessa nota. Memorizza dove sono e ritrova le coppie: cosi\' la nebbia si diradera\' del tutto.' },
+    ],
+    minigame: {
+      type: 'memory',
+      config: { title: 'Le conchiglie gemelle', tag: '🐚 Memory', prompt: 'Gira le conchiglie e trova le coppie uguali.', emojis: ['🐚', '🐠', '⭐', '🌊', '🦀', '🐙', '🪸', '🐢'] },
+      win: 'nebbie_3',
+      winText: 'Tutte le coppie ritrovate! La nebbia si apre e davanti a te appare una bambina.',
+      loseText: 'Ti sei confuso tra le conchiglie. Riprova, concentrati sulle posizioni.',
     },
   },
 

@@ -4,6 +4,7 @@
 // Restituisce Promise<{won, stars}>
 import { sfx } from '../audio.js';
 import { countdown } from './aim.js';
+import { createSpriteEl } from '../sprites.js';
 
 export function play(container, { diff, config }) {
   return new Promise((resolve) => {
@@ -18,27 +19,29 @@ export function play(container, { diff, config }) {
     let running = false;
     let rafId = null;
 
+    const fuse = config.theme === 'fuse';
     const root = document.createElement('div');
     root.className = 'mg mg-rhythm';
     root.innerHTML = `
       <div class="mg-head">
-        <span class="mg-tag">🎯 Tempismo</span>
+        <span class="mg-tag">${config.tag || '🎯 Tempismo'}</span>
         <span class="mg-lives" id="mg-lives"></span>
       </div>
       <h2 class="mg-title">${config.title || 'Ferma al momento giusto!'}</h2>
       <p class="mg-prompt">${config.prompt || 'Tocca quando il cursore e\' nella zona verde.'}</p>
       <div class="mg-progress" id="mg-prog"></div>
-      <div class="mg-bar" id="mg-bar">
-        <div class="mg-zone" id="mg-zone"></div>
-        <div class="mg-cursor" id="mg-cursor"></div>
+      <div class="mg-bar ${fuse ? 'mg-bar-fuse' : ''}" id="mg-bar">
+        <div class="mg-zone ${fuse ? 'mg-zone-wick' : ''}" id="mg-zone">${fuse ? '<span class="wick">' + (config.zoneEmoji || '🕯️') + '</span>' : ''}</div>
+        <div class="mg-cursor ${fuse ? 'mg-cursor-flint' : ''}" id="mg-cursor"></div>
       </div>
-      <button class="mg-action" id="mg-stop">FERMA!</button>
+      <button class="mg-action" id="mg-stop">${fuse ? '🔥 BATTI L\'ACCIARINO!' : 'FERMA!'}</button>
       <p class="mg-status" id="mg-status"></p>
     `;
     container.innerHTML = '';
     container.appendChild(root);
 
     const cursorEl = root.querySelector('#mg-cursor');
+    if (fuse) cursorEl.appendChild(createSpriteEl(config.cursorSprite || 'acciarino', 3));
     const zoneEl = root.querySelector('#mg-zone');
     const livesEl = root.querySelector('#mg-lives');
     const statusEl = root.querySelector('#mg-status');

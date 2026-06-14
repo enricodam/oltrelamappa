@@ -4,11 +4,15 @@ import { getState, newGame, load, hasSave, hasFlag, exportCode, importCode,
 import { ISLANDS } from './content/islands.js';
 import { initStory, goTo } from './story.js';
 import { sfx, setSound, soundOn } from './audio.js';
+import { createSpriteEl } from './sprites.js';
 
 const app = document.getElementById('app');
 initStory(app, { onMap: showMap, onTitle: showTitle });
 
 function byId(id) { return document.getElementById(id); }
+
+// icona floppy disk nel pulsante Salva
+(function () { const b = byId('saveBtn'); if (b) b.appendChild(createSpriteEl('floppy', 3)); })();
 
 // ===================== TITOLO =====================
 function showTitle() {

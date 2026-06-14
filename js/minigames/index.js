@@ -3,9 +3,10 @@
 import { play as rhythm } from './rhythm.js';
 import { play as aim } from './aim.js';
 import { play as logic } from './logic.js';
+import { play as memory } from './memory.js';
 import { diff as getDiff, diffByKey } from '../state.js';
 
-const REGISTRY = { rhythm, aim, logic };
+const REGISTRY = { rhythm, aim, logic, memory };
 
 // runMinigame(type, container, config, diffKey?) -> Promise<{won, stars}>
 // diffKey opzionale: difficolta scelta al volo per QUESTA prova (override del globale)
