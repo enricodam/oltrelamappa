@@ -84,6 +84,7 @@ export function newGame({ difficulty, reading, heroName }) {
 }
 
 export function diff() { return DIFFICULTY[state.difficulty] || DIFFICULTY.medio; }
+export function diffByKey(key) { return DIFFICULTY[key] || diff(); }
 export function isFamiglia() { return state.reading === 'famiglia'; }
 
 export function setFlag(key, value = true) { state.flags[key] = value; save(); }

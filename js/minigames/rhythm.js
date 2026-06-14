@@ -11,7 +11,7 @@ export function play(container, { diff, config }) {
     let lives = diff.lives;
     let pos = 0;            // 0..1
     let dir = 1;
-    const speed = 0.012 * diff.speed; // incremento per frame
+    let speed = 0.014 * diff.speed; // incremento per frame (cresce a ogni colpo)
     let zoneCenter = 0.5;
     const zoneHalf = 0.11 * diff.targetScale; // meta larghezza zona
     let running = true;
@@ -81,6 +81,7 @@ export function play(container, { diff, config }) {
         hits++;
         sfx.star();
         drawProg();
+        speed *= 1.18;  // ritmo crescente: ogni colpo accelera il cursore
         statusEl.textContent = hits >= roundsNeeded ? 'Perfetto!' : 'Colpito! ⭐';
         if (hits >= roundsNeeded) { end(true); return; }
         placeZone();

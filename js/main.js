@@ -13,7 +13,7 @@ function showTitle() {
   const canContinue = hasSave();
   app.innerHTML = `
     <div class="screen title-screen">
-      <div class="title-art">🗺️</div>
+      <img class="title-art" src="icons/icon-512.png" alt="Bussola" />
       <h1 class="game-title">Oltre la Mappa</h1>
       <p class="game-sub">Le Isole che si Allontanano</p>
       <div class="menu">

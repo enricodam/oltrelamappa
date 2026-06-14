@@ -1,5 +1,5 @@
 // Service worker - strategia network-first, aggiornamento automatico
-const CACHE = 'oltrelamappa-v1';
+const CACHE = 'oltrelamappa-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,11 @@ const ASSETS = [
   './js/content/story.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './sprites/bussola.png',
+  './sprites/vela.png',
+  './sprites/gancio.png',
+  './sprites/lina.png',
+  './sprites/hero.png',
 ];
 
 self.addEventListener('install', (e) => {

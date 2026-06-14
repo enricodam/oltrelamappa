@@ -16,8 +16,11 @@ export function play(container, { diff, config }) {
     let rafId = null;
     let items = [];          // {x, y, good, el}
     let spawnTimer = 0;
-    const fallSpeed = 0.006 * diff.speed;
-    const spawnEvery = Math.max(28, 60 / diff.speed); // frame tra spawn
+    const baseFall = 0.011 * diff.speed;     // velocita base (piu' reattiva di prima)
+    const baseSpawn = Math.max(22, 46 / diff.speed); // frame tra spawn
+    // ritmo crescente: piu' oggetti raccogli, piu' diventa veloce e fitto
+    const fallNow = () => baseFall * (1 + collected * 0.14);
+    const spawnNow = () => Math.max(12, baseSpawn - collected * 1.6);
     let moveDir = 0;         // -1, 0, 1 per pulsanti/tasti
 
     const root = document.createElement('div');
@@ -116,14 +119,15 @@ export function play(container, { diff, config }) {
 
     function loop() {
       if (!running) return;
-      if (moveDir !== 0) setHero(heroX + moveDir * 0.02 * diff.speed);
+      if (moveDir !== 0) setHero(heroX + moveDir * 0.03);  // movimento sempre reattivo
 
       spawnTimer++;
-      if (spawnTimer >= spawnEvery) { spawnTimer = 0; spawn(); }
+      if (spawnTimer >= spawnNow()) { spawnTimer = 0; spawn(); }
 
+      const step = fallNow();
       for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i];
-        it.y += fallSpeed;
+        it.y += step;
         it.el.style.top = (it.y * 100) + '%';
         // collisione vicino al fondo
         if (it.y >= 0.82 && it.y <= 0.96 && Math.abs(it.x - heroX) < 0.12) {

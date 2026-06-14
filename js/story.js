@@ -1,5 +1,5 @@
 // story.js - motore narrativo data-driven (nodi, scelte, minigiochi)
-// Struttura "a collana di perle": i nodi si diramano in scelte ma si riuniscono.
+// Dialoghi in stile RPG: ritratto pixel art del personaggio + nuvoletta.
 import { getState, visit, setFlag, hasFlag, isFamiglia, addStars, addBridge } from './state.js';
 import { runMinigame } from './minigames/index.js';
 import { sfx } from './audio.js';
@@ -7,21 +7,38 @@ import { NODES } from './content/story.js';
 
 let appEl = null;
 let hooks = {};
+let mgDiff = null; // difficolta scelta al volo per il minigioco corrente
 
 export function initStory(app, callbacks) {
   appEl = app;
   hooks = callbacks || {};
 }
 
-// scegli la variante di testo in base alla modalita lettura
+// mappa parlante -> sprite. Senza speaker = narrazione con lo sprite dell'eroe.
+const SPRITE = { bussola: 'bussola', vela: 'vela', gancio: 'gancio', lina: 'lina' };
+function spriteFor(node) { return 'sprites/' + (SPRITE[node.speakerClass] || 'hero') + '.png'; }
+function speakerName(node) { return node.speaker || getState().heroName; }
+
+const DIFF_CHIPS = [
+  ['facile', 'Facile', '🌱'],
+  ['medio', 'Medio', '⚓'],
+  ['difficile', 'Difficile', '🔥'],
+];
+
 function pick(text) {
   if (text == null) return '';
   if (typeof text === 'string') return text;
   return isFamiglia() ? (text.famiglia || text.ragazzi || '') : (text.ragazzi || text.famiglia || '');
 }
+function nameSub(s) { return s.replace(/\{nome\}/g, getState().heroName); }
 
-function nameSub(s) {
-  return s.replace(/\{nome\}/g, getState().heroName);
+function topbar(label) {
+  const st = getState();
+  return `
+    <div class="story-topbar">
+      <button class="mini-btn" data-act="map">🗺 MAPPA</button>
+      <span class="story-bridges">${label != null ? label : `🌉 ${st.bridges} · ⭐ ${st.stars}`}</span>
+    </div>`;
 }
 
 export function goTo(nodeId) {
@@ -29,7 +46,6 @@ export function goTo(nodeId) {
   if (!node) { console.warn('Nodo mancante:', nodeId); if (hooks.onMap) hooks.onMap(); return; }
   visit(nodeId);
 
-  // effetti all'ingresso del nodo
   if (node.onEnter) node.onEnter({ setFlag, hasFlag, addBridge, addStars });
   if (node.setFlags) node.setFlags.forEach(f => setFlag(f));
   if (node.bridge) addBridge();
@@ -39,15 +55,30 @@ export function goTo(nodeId) {
   return renderNarrative(node);
 }
 
-function renderNarrative(node) {
-  sfx.page();
-  const st = getState();
-  const speaker = node.speaker ? `<div class="story-speaker ${node.speakerClass || ''}">${node.speaker}</div>` : '';
-  const scene = node.scene ? `<div class="story-scene">${node.scene}</div>` : '';
+function dialogueBlock(node) {
   const paras = (Array.isArray(node.text) ? node.text : [node.text])
     .map(t => `<p>${nameSub(pick(t))}</p>`).join('');
+  return `
+    <div class="dialogue">
+      <div class="portrait portrait-${node.speakerClass || 'hero'}">
+        <img class="sprite" src="${spriteFor(node)}" alt="" />
+      </div>
+      <div class="bubble">
+        <div class="nameplate">${speakerName(node)}</div>
+        <div class="bubble-text">${paras}</div>
+      </div>
+    </div>`;
+}
 
-  // filtra scelte per requires/hideIf
+function wireTop() {
+  const m = appEl.querySelector('[data-act="map"]');
+  if (m) m.addEventListener('click', () => { sfx.click(); if (hooks.onMap) hooks.onMap(); });
+}
+
+function renderNarrative(node) {
+  sfx.page();
+  const scene = node.scene ? `<div class="story-scene">${node.scene}</div>` : '';
+
   const choices = (node.choices || []).filter(c => {
     if (c.requires && !hasFlag(c.requires)) return false;
     if (c.hideIf && hasFlag(c.hideIf)) return false;
@@ -56,30 +87,22 @@ function renderNarrative(node) {
 
   let choicesHtml = '';
   if (node.ending) {
-    choicesHtml = `<button class="story-choice end" data-act="title">↩ Torna all'inizio</button>`;
+    choicesHtml = `<button class="story-choice end" data-act="title">↩ TORNA ALL'INIZIO</button>`;
   } else if (choices.length) {
-    choicesHtml = choices.map((c, i) =>
-      `<button class="story-choice" data-i="${i}">${nameSub(pick(c.label))}</button>`).join('');
+    choicesHtml = choices.map((c, i) => `<button class="story-choice" data-i="${i}">${nameSub(pick(c.label))}</button>`).join('');
   } else if (node.next) {
     choicesHtml = `<button class="story-choice" data-next="${node.next}">${pick(node.continueLabel) || 'Avanti ▶'}</button>`;
   }
 
   appEl.innerHTML = `
     <div class="screen story-screen ${node.mood || ''}">
-      <div class="story-topbar">
-        <button class="mini-btn" data-act="map">🗺️ Mappa</button>
-        <span class="story-bridges">🌉 ${st.bridges} · ⭐ ${st.stars}</span>
-      </div>
+      ${topbar()}
       ${scene}
-      <div class="story-card">
-        ${speaker}
-        <div class="story-text">${paras}</div>
-      </div>
+      ${dialogueBlock(node)}
       <div class="story-choices">${choicesHtml}</div>
-    </div>
-  `;
+    </div>`;
 
-  appEl.querySelector('[data-act="map"]').addEventListener('click', () => { sfx.click(); if (hooks.onMap) hooks.onMap(); });
+  wireTop();
   const titleBtn = appEl.querySelector('[data-act="title"]');
   if (titleBtn) titleBtn.addEventListener('click', () => { sfx.click(); if (hooks.onTitle) hooks.onTitle(); });
 
@@ -97,26 +120,33 @@ function renderNarrative(node) {
 }
 
 function renderMinigameNode(node) {
-  const intro = node.text ? `<div class="story-text">${(Array.isArray(node.text) ? node.text : [node.text]).map(t => `<p>${nameSub(pick(t))}</p>`).join('')}</div>` : '';
+  if (mgDiff == null) mgDiff = getState().difficulty;
+  const chips = DIFF_CHIPS.map(([k, lbl, ic]) =>
+    `<button class="chip ${k === mgDiff ? 'sel' : ''}" data-d="${k}">${ic} ${lbl}</button>`).join('');
+
   appEl.innerHTML = `
     <div class="screen story-screen ${node.mood || ''}">
-      <div class="story-topbar">
-        <button class="mini-btn" data-act="map">🗺️ Mappa</button>
-        <span class="story-bridges">Prova in arrivo</span>
+      ${topbar('Prova in arrivo')}
+      ${dialogueBlock(node)}
+      <div class="diff-pick">
+        <span class="diff-label">Difficolta di questa prova:</span>
+        <div class="chips">${chips}</div>
       </div>
-      <div class="story-card">
-        ${node.speaker ? `<div class="story-speaker ${node.speakerClass || ''}">${node.speaker}</div>` : ''}
-        ${intro}
-      </div>
-      <div class="story-choices"><button class="story-choice start" id="mg-start">▶ Inizia la prova</button></div>
-    </div>
-  `;
-  appEl.querySelector('[data-act="map"]').addEventListener('click', () => { sfx.click(); if (hooks.onMap) hooks.onMap(); });
+      <div class="story-choices"><button class="story-choice start" id="mg-start">▶ INIZIA LA PROVA</button></div>
+    </div>`;
+
+  wireTop();
+  appEl.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+    sfx.click(); mgDiff = ch.dataset.d;
+    appEl.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+    ch.classList.add('sel');
+  }));
+
   appEl.querySelector('#mg-start').addEventListener('click', async () => {
     sfx.click();
     appEl.innerHTML = `<div class="screen mg-screen"><div id="mg-host"></div></div>`;
     const host = appEl.querySelector('#mg-host');
-    const result = await runMinigame(node.minigame.type, host, node.minigame.config || {});
+    const result = await runMinigame(node.minigame.type, host, node.minigame.config || {}, mgDiff);
     if (result.stars) addStars(result.stars);
     showResult(node, result);
   });
@@ -124,28 +154,25 @@ function renderMinigameNode(node) {
 
 function showResult(node, result) {
   const won = result.won;
-  const msg = won
-    ? pick(node.minigame.winText) || 'Ce l\'hai fatta!'
-    : pick(node.minigame.loseText) || 'Non e\' andata, ma puoi riprovare.';
+  const msg = won ? pick(node.minigame.winText) || 'Ce l\'hai fatta!' : pick(node.minigame.loseText) || 'Non e\' andata, ma puoi riprovare.';
   appEl.innerHTML = `
     <div class="screen story-screen">
-      <div class="story-card center">
+      <div class="result-card ${won ? 'win' : 'lose'}">
         <div class="result-emoji">${won ? '🎉' : '💪'}</div>
-        <div class="story-text"><p>${nameSub(msg)}</p></div>
+        <p class="result-msg">${nameSub(msg)}</p>
         ${result.stars ? `<p class="result-stars">+${result.stars} ⭐</p>` : ''}
       </div>
       <div class="story-choices">
         ${won
           ? `<button class="story-choice" id="r-next">Avanti ▶</button>`
-          : `<button class="story-choice" id="r-retry">🔄 Riprova</button>
-             ${node.minigame.skipTo ? `<button class="story-choice ghost" id="r-skip">Salta (prosegui)</button>` : ''}`}
+          : `<button class="story-choice" id="r-retry">🔄 RIPROVA</button>
+             ${node.minigame.skipTo ? `<button class="story-choice ghost" id="r-skip">Salta e prosegui</button>` : ''}`}
       </div>
-    </div>
-  `;
+    </div>`;
   const next = appEl.querySelector('#r-next');
-  if (next) next.addEventListener('click', () => { sfx.click(); goTo(node.minigame.win); });
+  if (next) next.addEventListener('click', () => { sfx.click(); mgDiff = null; goTo(node.minigame.win); });
   const retry = appEl.querySelector('#r-retry');
   if (retry) retry.addEventListener('click', () => { sfx.click(); renderMinigameNode(node); });
   const skip = appEl.querySelector('#r-skip');
-  if (skip) skip.addEventListener('click', () => { sfx.click(); goTo(node.minigame.skipTo); });
+  if (skip) skip.addEventListener('click', () => { sfx.click(); mgDiff = null; goTo(node.minigame.skipTo); });
 }
