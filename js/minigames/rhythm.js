@@ -3,6 +3,7 @@
 // config: { title, prompt, rounds }
 // Restituisce Promise<{won, stars}>
 import { sfx } from '../audio.js';
+import { countdown } from './aim.js';
 
 export function play(container, { diff, config }) {
   return new Promise((resolve) => {
@@ -13,8 +14,8 @@ export function play(container, { diff, config }) {
     let dir = 1;
     let speed = 0.014 * diff.speed; // incremento per frame (cresce a ogni colpo)
     let zoneCenter = 0.5;
-    const zoneHalf = 0.11 * diff.targetScale; // meta larghezza zona
-    let running = true;
+    const zoneHalf = 0.13 * diff.targetScale; // meta larghezza zona (un po' piu' generosa)
+    let running = false;
     let rafId = null;
 
     const root = document.createElement('div');
@@ -63,7 +64,7 @@ export function play(container, { diff, config }) {
       cursorEl.style.left = (pos * 100) + '%';
       rafId = requestAnimationFrame(loop);
     }
-    rafId = requestAnimationFrame(loop);
+    countdown(root, () => { running = true; rafId = requestAnimationFrame(loop); });
 
     function end(won) {
       running = false;

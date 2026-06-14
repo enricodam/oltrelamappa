@@ -129,8 +129,8 @@ export function play(container, { diff, config }) {
         const it = items[i];
         it.y += step;
         it.el.style.top = (it.y * 100) + '%';
-        // collisione vicino al fondo
-        if (it.y >= 0.82 && it.y <= 0.96 && Math.abs(it.x - heroX) < 0.12) {
+        // collisione: appena l'oggetto raggiunge la fascia dell'eroe (piu' generosa)
+        if (it.y >= 0.80 && Math.abs(it.x - heroX) < 0.15) {
           if (it.good) { collected++; sfx.star(); drawProg(); }
           else { lives--; sfx.bad(); drawLives(); statusEl.textContent = 'Ahia!'; }
           it.el.remove(); items.splice(i, 1);
@@ -142,6 +142,27 @@ export function play(container, { diff, config }) {
       }
       rafId = requestAnimationFrame(loop);
     }
-    rafId = requestAnimationFrame(loop);
+
+    // countdown 3-2-1 poi via
+    countdown(field, () => { running = true; rafId = requestAnimationFrame(loop); });
+    running = false;
   });
+}
+
+// piccolo conto alla rovescia mostrato sopra il campo
+export function countdown(host, onDone) {
+  const ov = document.createElement('div');
+  ov.className = 'mg-count';
+  ov.style.position = 'absolute'; ov.style.inset = '0'; ov.style.display = 'grid'; ov.style.placeItems = 'center';
+  ov.style.background = 'rgba(10,23,48,.6)'; ov.style.zIndex = '5';
+  host.style.position = host.style.position || 'relative';
+  host.appendChild(ov);
+  let n = 3;
+  ov.textContent = n;
+  const t = setInterval(() => {
+    n--;
+    if (n > 0) { ov.textContent = n; sfx && sfx.click(); }
+    else if (n === 0) { ov.textContent = 'VIA!'; sfx && sfx.good(); }
+    else { clearInterval(t); ov.remove(); onDone(); }
+  }, 650);
 }
